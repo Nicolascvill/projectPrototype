@@ -4,9 +4,9 @@ import { AuthService } from '../services/auth.service';
 import { jwtDecode } from 'jwt-decode';
 
 @Injectable({ providedIn: 'root' })
-export class AuthGuard implements CanActivate {
+export class AuthRedirectGuard implements CanActivate {
 
-    constructor(private router: Router, private authService: AuthService) { }
+    constructor(private router: Router, private authService: AuthService) {}
 
     canActivate(): boolean | UrlTree {
         const token = this.authService.getToken();
@@ -16,15 +16,16 @@ export class AuthGuard implements CanActivate {
             if (decodedToken && decodedToken.exp) {
                 const now = Date.now().valueOf() / 1000;
                 if (decodedToken.exp > now) {
-                    this.authService.startAutoLogout();
-                    return true;
+                    // Si el token es válido y no expirado, redirigimos al dashboard
+                    return this.router.parseUrl('/dashboard');
                 }
             }
-            //si token expiro o es invalido
+            // Token inválido o expirado, limpiamos todo
             this.authService.logout();
             return this.router.parseUrl('/auth/login');
         } else {
-            return this.router.parseUrl('/auth/login');
+            // No hay token, que siga en login
+            return true;
         }
     }
 
@@ -36,5 +37,4 @@ export class AuthGuard implements CanActivate {
             return null;
         }
     }
-
 }

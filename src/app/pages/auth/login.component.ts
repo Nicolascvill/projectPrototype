@@ -9,6 +9,7 @@ import { RippleModule } from 'primeng/ripple';
 import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
     selector: 'app-login',
@@ -25,28 +26,40 @@ export class Login {
     checked: boolean = false;
 
     constructor(private router: Router,
-        private messageService: MessageService
+        private messageService: MessageService,
+        private authService: AuthService
     ) { }
 
-    ngOnInit() { 
-        const token=localStorage.getItem('token');
-        if(token){
+    ngOnInit() {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (token) {
             this.router.navigate(['dashboard']);
         }
     }
 
     onLogin() {
-        if (this.email === 'admin' && this.password === 'admin') {
-            localStorage.setItem('token', 'mock-token');
-            this.router.navigate(['/dashboard']);
-        } else {
-            this.messageService.add({
-                severity: 'error',
-                summary: 'Credenciales inválidas',
-                detail: 'El usuario o la contraseña no son correctos',
-                life: 3000
-            });
-        }
+        this.authService.login(this.email, this.password).subscribe({
+            next: (response) => {
+                this.authService.saveTokens(response.accessToken, response.refreshToken);
+    
+                if (this.checked) {
+                    localStorage.setItem('remember', 'true');
+                } else {
+                    sessionStorage.setItem('remember', 'false');
+                }
+    
+                this.router.navigate(['/dashboard']);
+            },
+            error: () => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Credenciales inválidas',
+                    detail: 'El usuario o la contraseña no son correctos',
+                    life: 3000
+                });
+            }
+        });
     }
+    
 
 }

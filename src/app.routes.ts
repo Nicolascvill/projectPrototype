@@ -5,11 +5,14 @@ import { Documentation } from './app/pages/documentation/documentation';
 import { Landing } from './app/pages/landing/landing';
 import { Notfound } from './app/pages/notfound/notfound';
 import { AuthGuard } from './app/guards/auth.guard';
+import { AuthRedirectGuard } from './app/guards/auth-redirect.guard';
+import { RedirectComponent } from './app/pages/redirect/redirect.component';
 
 export const appRoutes: Routes = [
     {
         path: '',
-        redirectTo: 'auth/login',
+        component: RedirectComponent,
+        canActivate: [AuthRedirectGuard],
         pathMatch: 'full'
     },
     {
@@ -23,8 +26,8 @@ export const appRoutes: Routes = [
             { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') }
         ]
     },
-    { path: 'landing', component: Landing },
-    { path: 'notfound', component: Notfound },
     { path: 'auth', loadChildren: () => import('./app/pages/auth/auth.routes') },
+    { path: 'landing', component: Landing },
+    { path: 'notfound', component: Notfound },    
     { path: '**', redirectTo: '/notfound' }
 ];

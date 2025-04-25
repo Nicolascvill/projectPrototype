@@ -6,6 +6,7 @@ import { StyleClassModule } from 'primeng/styleclass';
 import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '../service/layout.service';
 import { MenuModule } from 'primeng/menu';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
     selector: 'app-topbar',
@@ -91,7 +92,7 @@ export class AppTopbar {
     items!: MenuItem[];
     profileItems: MenuItem[] = [];
 
-    constructor(public layoutService: LayoutService, private router: Router) { }
+    constructor(public layoutService: LayoutService, private authService: AuthService ) { }
 
     ngOnInit() {
         this.profileItems = [
@@ -103,10 +104,10 @@ export class AppTopbar {
         ];
     }
 
-    logout() {
-        localStorage.removeItem('token');
-        this.router.navigate(['/auth/login']);
+    logout(): void {
+        this.authService.logout(); 
     }
+    
 
     toggleDarkMode() {
         this.layoutService.layoutConfig.update((state) => ({ ...state, darkTheme: !state.darkTheme }));
